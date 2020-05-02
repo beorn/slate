@@ -292,7 +292,11 @@ export const Editable = (props: EditableProps) => {
             })
 
             if (!selection || !Range.equals(selection, range)) {
-              Transforms.select(editor, range)
+              // Transforms.select(editor, range)
+              const msg =
+                'Slate and browser DOM selection is different, would normally change' +
+                ' - but disabled as it seems to work in latest Chrome'
+              console.log(msg, { slate: selection, browser: range }) // eslint-disable-line
             }
           }
         }

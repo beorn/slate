@@ -87,7 +87,7 @@ export const SelectionTransforms: SelectionTransforms = {
     } = {}
   ): void {
     const { selection } = editor
-    const { distance = 1, unit = 'character', reverse = false } = options
+    const { distance = 1, unit = 'offset', reverse = false } = options
     let { edge = null } = options
 
     if (!selection) {
