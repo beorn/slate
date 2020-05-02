@@ -379,6 +379,8 @@ export const Node = {
     const visited = new Set()
     let p: Path = []
     let n = root
+    // console.log("Node.nodes:", { root, from, to, pass, reverse })
+
 
     while (true) {
       if (to && (reverse ? Path.isBefore(p, to) : Path.isAfter(p, to))) {
