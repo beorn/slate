@@ -22,6 +22,8 @@ const HOTKEYS = {
 }
 
 const APPLE_HOTKEYS = {
+  moveBackward: ['left', 'ctrl+b'],
+  moveForward: ['right', 'ctrl+f'],
   moveLineBackward: 'opt+up',
   moveLineForward: 'opt+down',
   moveWordBackward: 'opt+left',
