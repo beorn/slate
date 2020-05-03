@@ -36,7 +36,7 @@ const Leaf = (props: {
           style={{
             pointerEvents: 'none',
             display: 'inline-block',
-            verticalAlign: 'text-top',
+            // verticalAlign: 'text-top', // impossible to override, and causes text to jump when going from placeholder to real text
             width: '0',
             maxWidth: '100%',
             whiteSpace: 'nowrap',
