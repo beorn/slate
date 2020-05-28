@@ -983,14 +983,14 @@ export const Editable = (props: EditableProps) => {
           [readOnly, attributes.onPaste]
         )}
       >
-        <Children
-          decorate={decorate}
+        {Children({ decorate, decorations, node: editor, renderElement, renderLeaf, selection: editor.selection })}
+        {/* decorate={decorate}
           decorations={decorations}
           node={editor}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
-          selection={editor.selection}
-        />
+          selection={editor.selection} */}
+        {/* /> */}
       </Component>
     </ReadOnlyContext.Provider>
   )

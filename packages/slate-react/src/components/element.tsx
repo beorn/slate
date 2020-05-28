@@ -42,16 +42,21 @@ const Element = (props: {
   const isInline = editor.isInline(element)
   const key = ReactEditor.findKey(editor, element)
 
-  let children: JSX.Element | null = (
-    <Children
-      decorate={decorate}
-      decorations={decorations}
-      node={element}
-      renderElement={renderElement}
-      renderLeaf={renderLeaf}
-      selection={selection}
-    />
+  // Keep as a list of elements, not fragment-component, reducing the depth
+  // of the component tree, and making it easier for render* functions to
+  // manipulate the children.
+  let children: JSX.Element[] | null = Children(
+    { decorate, decorations, node: element, renderElement, renderLeaf, selection }
   )
+  // let children: JSX.Element | null = (
+  //   <Children
+  //     decorate={decorate}
+  //     decorations={decorations}
+  //     node={element}
+  //     renderElement={renderElement}
+  //     renderLeaf={renderLeaf}
+  //     selection={selection}
+  //   />
 
   // Attributes that the developer must mix into the element in their
   // custom node renderer component.
@@ -93,7 +98,7 @@ const Element = (props: {
     const Tag = isInline ? 'span' : 'div'
     const [[text]] = Node.texts(element)
 
-    children = readOnly ? null : (
+    children = readOnly ? null : [(
       <Tag
         data-slate-spacer
         style={{
@@ -105,7 +110,7 @@ const Element = (props: {
       >
         <Text decorations={[]} isLast={false} parent={element} text={text} />
       </Tag>
-    )
+    )]
 
     NODE_TO_INDEX.set(text, 0)
     NODE_TO_PARENT.set(text, element)
