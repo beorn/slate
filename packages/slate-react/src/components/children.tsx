@@ -81,7 +81,7 @@ const Children = (props: {
     NODE_TO_PARENT.set(n, node)
   }
 
-  return <React.Fragment>{children}</React.Fragment>
+  return children
 }
 
 export default Children
