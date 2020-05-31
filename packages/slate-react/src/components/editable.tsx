@@ -344,9 +344,19 @@ export const Editable = (props: EditableProps) => {
             break
           }
 
-          case 'insertLineBreak':
+          case 'insertLineBreak': {
+            if (editor.insertLineBreak) {
+              editor.insertLineBreak()
+            } else {
+              Editor.insertBreak(editor)
+            }
+          }
           case 'insertParagraph': {
-            Editor.insertBreak(editor)
+            if (editor.insertParagraph) {
+              editor.insertParagraph()
+            } else {
+              Editor.insertBreak(editor)
+            }
             break
           }
 
