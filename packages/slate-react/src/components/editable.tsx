@@ -365,6 +365,11 @@ export const Editable = (props: EditableProps) => {
             break
           }
 
+          case 'insertFromYank': {
+            if (editor.killBuffer) Editor.insertFragment(editor, editor.killBuffer as Node[])
+            break
+          }
+
           case 'insertFromComposition':
           case 'insertFromDrop':
           case 'insertFromPaste':
@@ -606,7 +611,6 @@ export const Editable = (props: EditableProps) => {
 
               const startVoid = Editor.void(editor, { at: start })
               const endVoid = Editor.void(editor, { at: end })
-
               if (
                 startVoid &&
                 endVoid &&
