@@ -297,6 +297,13 @@ export const Editable = (props: EditableProps) => {
           }
 
           case 'deleteHardLineForward': {
+            if (!selection) break
+            const at = selection.anchor
+            const block = Editor.above(editor, { at, match: (n) => Editor.isBlock(editor, n) })
+            const [, end] = Editor.edges(editor, block![1])
+            const range = Editor.range(editor, at, end)
+            saveKillBuffer(range)
+
             Editor.deleteForward(editor, { unit: 'block' })
             break
           }
@@ -319,6 +326,11 @@ export const Editable = (props: EditableProps) => {
           case 'insertLineBreak':
           case 'insertParagraph': {
             Editor.insertBreak(editor)
+            break
+          }
+
+          case 'insertFromYank': {
+            if (editor.killBuffer) Editor.insertFragment(editor, editor.killBuffer as Node[])
             break
           }
 
