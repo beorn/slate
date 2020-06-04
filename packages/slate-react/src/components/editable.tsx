@@ -382,7 +382,10 @@ export const Editable = (props: EditableProps) => {
               console.error("editable.insertText", data, editor.selection)
               Editor.insertText(editor, data)
             }
-
+            break
+          }
+          default: {
+            console.warn("onDOMBeforeInput: Unhandled event type", type, { event })
             break
           }
         }
@@ -417,6 +420,7 @@ export const Editable = (props: EditableProps) => {
   const onDOMSelectionChange = useCallback(
     throttle(() => {
       if (!readOnly && !state.isComposing && !state.isUpdatingSelection) {
+        console.log("Editable.onDOMSelectionChange")
         const { activeElement } = window.document
         const el = ReactEditor.toDOMNode(editor, editor)
         const domSelection = window.getSelection()
@@ -534,6 +538,7 @@ export const Editable = (props: EditableProps) => {
             ) {
               event.preventDefault()
               const text = (event as any).data as string
+              console.log("Editable.onBeforeInput", { text, editor })
               Editor.insertText(editor, text)
             }
           },
@@ -541,6 +546,7 @@ export const Editable = (props: EditableProps) => {
         )}
         onBlur={useCallback(
           (event: React.FocusEvent<HTMLDivElement>) => {
+            console.log("Editable.onBlur")
             if (
               readOnly ||
               state.isUpdatingSelection ||
@@ -598,6 +604,7 @@ export const Editable = (props: EditableProps) => {
         )}
         onClick={useCallback(
           (event: React.MouseEvent<HTMLDivElement>) => {
+            console.log("Editable.onClick", { target: event.target })
             if (
               !readOnly &&
               hasTarget(editor, event.target) &&
@@ -629,6 +636,7 @@ export const Editable = (props: EditableProps) => {
               hasEditableTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onCompositionEnd)
             ) {
+              console.log("Editable.onCompositionEnd", { target: event.target, data: event.data })
               state.isComposing = false
 
               // COMPAT: In Chrome, `beforeinput` events for compositions
@@ -648,6 +656,7 @@ export const Editable = (props: EditableProps) => {
               hasEditableTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onCompositionStart)
             ) {
+              console.log("Editable.onCompositionStart", { target: event.target })
               state.isComposing = true
             }
           },
@@ -689,6 +698,7 @@ export const Editable = (props: EditableProps) => {
               hasTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onDragOver)
             ) {
+              console.log("Editable.onDragOver", { target: event.target })
               // Only when the target is void, call `preventDefault` to signal
               // that drops are allowed. Editable content is droppable by
               // default, and calling `preventDefault` hides the cursor.
@@ -707,6 +717,7 @@ export const Editable = (props: EditableProps) => {
               hasTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onDragStart)
             ) {
+              console.log("Editable.onDragStart", { target: event.target })
               const node = ReactEditor.toSlateNode(editor, event.target)
               const path = ReactEditor.findPath(editor, node)
               const voidMatch = Editor.void(editor, { at: path })
@@ -730,6 +741,7 @@ export const Editable = (props: EditableProps) => {
               !readOnly &&
               !isEventHandled(event, attributes.onDrop)
             ) {
+              console.log("Editable.onDrop", { target: event.target })
               // COMPAT: Certain browsers don't fire `beforeinput` events at all, and
               // Chromium browsers don't properly fire them for files being
               // dropped into a `contenteditable`. (2019/11/26)
@@ -774,6 +786,13 @@ export const Editable = (props: EditableProps) => {
         )}
         onKeyDown={useCallback(
           (event: React.KeyboardEvent<HTMLDivElement>) => {
+            console.log("Editable.onKeyDown --- start", event.key,
+              {
+                editableTarget: hasEditableTarget(editor, event.target),
+                eventHandled: isEventHandled(event, attributes.onKeyDown),
+                readOnly
+              },
+              { event, attributes })
             if (
               !readOnly &&
               hasEditableTarget(editor, event.target) &&
@@ -787,6 +806,7 @@ export const Editable = (props: EditableProps) => {
               // any history stack to undo or redo, so we have to manage these
               // hotkeys ourselves. (2019/11/06)
               if (Hotkeys.isRedo(nativeEvent)) {
+                console.log("Editable.onKeyDown redo", { target: event.target })
                 event.preventDefault()
 
                 if (typeof editor.redo === 'function') {
@@ -797,6 +817,7 @@ export const Editable = (props: EditableProps) => {
               }
 
               if (Hotkeys.isUndo(nativeEvent)) {
+                console.log("Editable.onKeyDown undo", { target: event.target })
                 event.preventDefault()
 
                 if (typeof editor.undo === 'function') {
@@ -811,18 +832,21 @@ export const Editable = (props: EditableProps) => {
               // And in Firefox, the selection isn't properly collapsed.
               // (2017/10/17)
               if (Hotkeys.isMoveLineBackward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveLineBackward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, { unit: 'line', reverse: true })
                 return
               }
 
               if (Hotkeys.isMoveLineForward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveLineForward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, { unit: 'line' })
                 return
               }
 
               if (Hotkeys.isExtendLineBackward(nativeEvent)) {
+                console.log("Editable.onKeyDown extendLineBackward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, {
                   unit: 'line',
@@ -833,6 +857,7 @@ export const Editable = (props: EditableProps) => {
               }
 
               if (Hotkeys.isExtendLineForward(nativeEvent)) {
+                console.log("Editable.onKeyDown extendLineForward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, { unit: 'line', edge: 'focus' })
                 return
@@ -844,6 +869,7 @@ export const Editable = (props: EditableProps) => {
               // the void node with the zero-width space not being an empty
               // string.
               if (Hotkeys.isMoveBackward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveBackward", { target: event.target })
                 event.preventDefault()
 
                 if (selection && Range.isCollapsed(selection)) {
@@ -856,6 +882,7 @@ export const Editable = (props: EditableProps) => {
               }
 
               if (Hotkeys.isMoveForward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveForeward", { target: event.target })
                 event.preventDefault()
 
                 if (selection && Range.isCollapsed(selection)) {
@@ -868,12 +895,14 @@ export const Editable = (props: EditableProps) => {
               }
 
               if (Hotkeys.isMoveWordBackward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveWordBackward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, { unit: 'word', reverse: true })
                 return
               }
 
               if (Hotkeys.isMoveWordForward(nativeEvent)) {
+                console.log("Editable.onKeyDown moveWordForeward", { target: event.target })
                 event.preventDefault()
                 Transforms.move(editor, { unit: 'word' })
                 return
@@ -883,6 +912,7 @@ export const Editable = (props: EditableProps) => {
               // fall back to guessing at the input intention for hotkeys.
               // COMPAT: In iOS, some of these hotkeys are handled in the
               if (!HAS_BEFORE_INPUT_SUPPORT) {
+                console.log("Editable.onKeyDown no beforeinput support")
                 // We don't have a core behavior for these, but they change the
                 // DOM if we don't prevent them, so we have to.
                 if (
@@ -890,12 +920,14 @@ export const Editable = (props: EditableProps) => {
                   Hotkeys.isItalic(nativeEvent) ||
                   Hotkeys.isTransposeCharacter(nativeEvent)
                 ) {
+                  console.log("Editable.onKeyDown no beforeinput - blocking bold/italic/transpose event", { nativeEvent })
                   event.preventDefault()
                   return
                 }
 
                 if (Hotkeys.isSplitBlock(nativeEvent)) {
                   event.preventDefault()
+                  console.log("Editable.onKeyDown no beforeinput - splitBlock", { nativeEvent })
                   Editor.insertBreak(editor)
                   return
                 }
@@ -904,8 +936,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteBackward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteBackward", { nativeEvent })
                     Editor.deleteBackward(editor)
                   }
 
@@ -916,8 +950,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteForward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteForward", { nativeEvent })
                     Editor.deleteForward(editor)
                   }
 
@@ -928,8 +964,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteLineBackward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteLineBackward", { nativeEvent })
                     Editor.deleteBackward(editor, { unit: 'line' })
                   }
 
@@ -940,8 +978,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteLineForward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteLineForward", { nativeEvent })
                     Editor.deleteForward(editor, { unit: 'line' })
                   }
 
@@ -952,8 +992,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteWordBackward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteWordBackward", { nativeEvent })
                     Editor.deleteBackward(editor, { unit: 'word' })
                   }
 
@@ -964,8 +1006,10 @@ export const Editable = (props: EditableProps) => {
                   event.preventDefault()
 
                   if (selection && Range.isExpanded(selection)) {
+                    console.log("Editable.onKeyDown no beforeinput - deleteWordForward range", { nativeEvent })
                     Editor.deleteFragment(editor)
                   } else {
+                    console.log("Editable.onKeyDown no beforeinput - deleteWordForward", { nativeEvent })
                     Editor.deleteForward(editor, { unit: 'word' })
                   }
 
@@ -973,6 +1017,7 @@ export const Editable = (props: EditableProps) => {
                 }
               }
             }
+            console.log("Editable.onKeyDown --- end", event.key)
           },
           [readOnly, attributes.onKeyDown]
         )}
