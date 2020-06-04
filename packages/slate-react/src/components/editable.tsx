@@ -251,7 +251,7 @@ export const Editable = (props: EditableProps) => {
         }
 
 
-        function saveKillBuffer(at = targetRange) {
+        function saveKillBuffer(at) {
           const targetNodes = Editor.fragment(editor, at)
           console.log("onDOMBeforeInput: Saving kill buffer", targetNodes)
           editor.killBuffer = targetNodes // TODO: this should probably be a transformation
