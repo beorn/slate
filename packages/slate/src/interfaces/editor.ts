@@ -33,6 +33,12 @@ import { getWordDistance, getCharacterDistance } from '../utils/string'
  * by plugins that wish to add their own helpers and implement new behaviors.
  */
 
+const dump = (l) => {
+  if (Array.isArray(l))
+    return l.map(i => JSON.stringify(i))
+  return JSON.stringify(l)
+}
+
 export interface Editor {
   children: Node[]
   selection: Range | null
@@ -123,6 +129,7 @@ export const Editor = {
       unit?: 'offset' | 'character' | 'word' | 'line' | 'block'
     } = {}
   ): Point | undefined {
+    console.group("Editor.after", { at })
     const anchor = Editor.point(editor, at, { edge: 'end' })
     const focus = Editor.end(editor, [])
     const range = { anchor, focus }
@@ -130,9 +137,10 @@ export const Editor = {
     let d = 0
     let target
 
-    console.log("checking after for", range, distance)
+    const pos = [...Editor.positions(editor, { ...options, at: range })]
+    console.log("Editor.after: Positions", dump(pos), range, distance)
     for (const p of Editor.positions(editor, { ...options, at: range })) {
-      console.log("checking", p, d)
+      console.log("Editor.after: Checking", p, d)
       if (d > distance) {
         break
       }
@@ -143,7 +151,8 @@ export const Editor = {
 
       d++
     }
-    console.log("found", target, d)
+    console.log("Editor.after: Found", target, d)
+    console.groupEnd()
 
     return target
   },
@@ -160,6 +169,7 @@ export const Editor = {
       unit?: 'offset' | 'character' | 'word' | 'line' | 'block'
     } = {}
   ): Point | undefined {
+    console.group("Editor.before", { at })
     const anchor = Editor.start(editor, [])
     const focus = Editor.point(editor, at, { edge: 'start' })
     const range = { anchor, focus }
@@ -167,11 +177,16 @@ export const Editor = {
     let d = 0
     let target
 
-    for (const p of Editor.positions(editor, {
+    const pos = [...Editor.positions(editor, {
       ...options,
       at: range,
       reverse: true,
-    })) {
+    })]
+    console.log("Editor.before: positions", dump(pos), { options, at: dump(range) })
+
+
+    for (const p of pos) {
+      console.log("Editor.before: Checking", p, d)
       if (d > distance) {
         break
       }
@@ -182,6 +197,8 @@ export const Editor = {
 
       d++
     }
+    console.log("Editor.before: Found", target, d)
+    console.groupEnd()
 
     return target
   },
