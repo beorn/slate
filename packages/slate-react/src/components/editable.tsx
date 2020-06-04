@@ -171,6 +171,8 @@ export const Editable = (props: EditableProps) => {
     state.isUpdatingSelection = true
     domSelection.removeAllRanges()
 
+    console.log("Editable: updating DOM Selection")
+
     const newDomRange = selection && ReactEditor.toDOMRange(editor, selection)
 
     if (newDomRange) {
@@ -419,6 +421,13 @@ export const Editable = (props: EditableProps) => {
   // while a selection is being dragged.
   const onDOMSelectionChange = useCallback(
     throttle(() => {
+      console.log("Editable.onDOMSelectionChange early:",
+        {
+          isUpdatingSelection: state.isUpdatingSelection,
+          domNode: ReactEditor.toDOMNode(editor, editor),
+          domSelection: window.getSelection()
+        }
+      )
       if (!readOnly && !state.isComposing && !state.isUpdatingSelection) {
         console.log("Editable.onDOMSelectionChange")
         const { activeElement } = window.document
@@ -604,7 +613,15 @@ export const Editable = (props: EditableProps) => {
         )}
         onClick={useCallback(
           (event: React.MouseEvent<HTMLDivElement>) => {
-            console.log("Editable.onClick", { target: event.target })
+            const node = event.target && ReactEditor.toSlateNode(editor, event.target)
+            const path = editor && node && ReactEditor.findPath(editor, node)
+            console.log("Editable.onClick", {
+              event, target: event.target,
+              attributes,
+              hasTarget: hasTarget(editor, event.target),
+              isHandled: isEventHandled(event, attributes.onClick),
+              node, path
+            })
             if (
               !readOnly &&
               hasTarget(editor, event.target) &&
