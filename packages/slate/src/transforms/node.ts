@@ -170,9 +170,8 @@ export const NodeTransforms = {
           )
         }
 
-        const parentNodeEntry = Editor.node(editor, Path.parent(path))
-        const [parent, parentPath] = parentNodeEntry as NodeEntry<Ancestor>
-        const index = path[path.length - 1]
+        const [parent, parentPath] = Editor.node(editor, Path.parent(path))
+        const index = path[path.length - 1]   // parent's index amongst grandparent.children
         const { length } = parent.children
 
         if (length === 1) { // node is only child of parent, replace parent
