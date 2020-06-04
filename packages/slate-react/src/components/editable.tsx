@@ -248,7 +248,11 @@ export const Editable = (props: EditableProps) => {
                 domTarget: targetRange })
             
             if (!selection || !Range.equals(selection, range)) {
-              Transforms.select(editor, range)
+              // Transforms.select(editor, range)
+              console.log(
+                "Slate and browser DOM selection is different, would normally change"
+                + " - but disabled as it seems to work in latest Chrome",
+                { slate: selection, browser: range })
             }
           }
         }
