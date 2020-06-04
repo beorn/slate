@@ -130,7 +130,9 @@ export const Editor = {
     let d = 0
     let target
 
+    console.log("checking after for", range, distance)
     for (const p of Editor.positions(editor, { ...options, at: range })) {
+      console.log("checking", p, d)
       if (d > distance) {
         break
       }
@@ -141,6 +143,7 @@ export const Editor = {
 
       d++
     }
+    console.log("found", target, d)
 
     return target
   },
@@ -374,6 +377,7 @@ export const Editor = {
 
   /**
    * Check if an element is empty, accounting for void nodes.
+   * TODO: Only considers first child - if it's an empty text node, are we guaranteed all children are empty?
    */
 
   isEmpty(editor: Editor, element: Element): boolean {
@@ -631,6 +635,7 @@ export const Editor = {
       voids = false,
     } = options
     let { match } = options
+    // console.log("Editor.nodes:", { at, mode, match })
 
     if (!match) {
       match = () => true
@@ -646,11 +651,13 @@ export const Editor = {
     if (Span.isSpan(at)) {
       from = at[0]
       to = at[1]
+      // console.log("Editor.nodes:", { from, to })
     } else {
       const first = Editor.path(editor, at, { edge: 'start' })
       const last = Editor.path(editor, at, { edge: 'end' })
       from = reverse ? last : first
       to = reverse ? first : last
+      // console.log("Editor.nodes:", { first, last, from, to })
     }
 
     const iterable = Node.nodes(editor, {
@@ -792,7 +799,7 @@ export const Editor = {
     at: Location,
     options: {
       depth?: number
-      edge?: 'start' | 'end'
+      edge?: 'start' | 'end' | null
     } = {}
   ): Path {
     const { depth, edge } = options
@@ -1513,6 +1520,8 @@ export const Editor = {
 
   /**
    * Convert a range into a non-hanging one.
+   * If range is not collapsed and ends at the start edge of a text block,
+   * make it end at the end edge of the preceding text block instead.
    */
 
   unhangRange(
@@ -1526,31 +1535,37 @@ export const Editor = {
     let [start, end] = Range.edges(range)
 
     // PERF: exit early if we can guarantee that the range isn't hanging.
+    // TODO: Why is start.offset===0 a criteria to consider a block 'hanging'?
     if (start.offset !== 0 || end.offset !== 0 || Range.isCollapsed(range)) {
       return range
     }
 
+    // endBlock = block above range's end = block with text node children
     const endBlock = Editor.above(editor, {
       at: end,
       match: n => Editor.isBlock(editor, n),
     })
-    const blockPath = endBlock ? endBlock[1] : []
+    const endBlockPath = endBlock ? endBlock[1] : []
     const first = Editor.start(editor, [])
     const before = { anchor: first, focus: end }
-    let skip = true
+    let firstMatch = true
 
+    // Look backwards from endBlock for non-empty text nodes, skipping the first,
+    // since that would be the text node in endBlock that we're at offset=0 on.
+    // Set end of the range to the end of the next text node (the node the one we're on).
     for (const [node, path] of Editor.nodes(editor, {
       at: before,
       match: Text.isText,
       reverse: true,
       voids,
     })) {
-      if (skip) {
-        skip = false
+      if (firstMatch) {
+        firstMatch = false
         continue
       }
 
-      if (node.text !== '' || Path.isBefore(path, blockPath)) {
+      // has text content and is before endBlockPath (= isn't that always the case?)
+      if (node.text !== '' || Path.isBefore(path, endBlockPath)) {
         end = { path, offset: node.text.length }
         break
       }

@@ -203,6 +203,7 @@ export const createEditor = (): Editor => {
       // Ensure that block and inline nodes have at least one text child.
       if (Element.isElement(node) && node.children.length === 0) {
         const child = { text: '' }
+        console.log("Normalize: Block and line nodes must have at least one text child: Adding one to node", { node })
         Transforms.insertNodes(editor, child, {
           at: path.concat(0),
           voids: true,
@@ -236,6 +237,7 @@ export const createEditor = (): Editor => {
         // other inline nodes, or parent blocks that only contain inlines and
         // text.
         if (isInlineOrText !== shouldHaveInlines) {
+          console.log("Normalize: Parent node should not have inlines, but child is inline: Removing child from parent", { parent: node, child })
           Transforms.removeNodes(editor, { at: path.concat(n), voids: true })
           n--
         } else if (Element.isElement(child)) {
@@ -261,15 +263,18 @@ export const createEditor = (): Editor => {
           // Merge adjacent text nodes that are empty or match.
           if (prev != null && Text.isText(prev)) {
             if (Text.equals(child, prev, { loose: true })) {
+              console.log("Normalize: Adjacent text nodes are the same: Merging", { prev, next: child })
               Transforms.mergeNodes(editor, { at: path.concat(n), voids: true })
               n--
             } else if (prev.text === '') {
+              console.log("Normalize: One adjacent text node is empty: Removing", { prev, next: child })
               Transforms.removeNodes(editor, {
                 at: path.concat(n - 1),
                 voids: true,
               })
               n--
             } else if (isLast && child.text === '') {
+              console.log("Normalize: One adjacent text node is empty: Removing", { prev, next: child })
               Transforms.removeNodes(editor, {
                 at: path.concat(n),
                 voids: true,

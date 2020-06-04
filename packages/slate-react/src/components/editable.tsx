@@ -243,7 +243,10 @@ export const Editable = (props: EditableProps) => {
 
           if (targetRange) {
             const range = ReactEditor.toSlateRange(editor, targetRange)
-
+            console.error("toRange", {rangesEqual: Range.equals(selection, range)},
+              { slateSelection: editor.selection, slateTarget: range,
+                domTarget: targetRange })
+            
             if (!selection || !Range.equals(selection, range)) {
               Transforms.select(editor, range)
             }
@@ -357,6 +360,7 @@ export const Editable = (props: EditableProps) => {
             if (data instanceof DataTransfer) {
               ReactEditor.insertData(editor, data)
             } else if (typeof data === 'string') {
+              console.error("editable.insertText", data, editor.selection)
               Editor.insertText(editor, data)
             }
 

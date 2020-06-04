@@ -223,11 +223,13 @@ export const ReactEditor = {
     const [node] = Editor.node(editor, point.path)
     const el = ReactEditor.toDOMNode(editor, node)
     let domPoint: DOMPoint | undefined
+    // console.log("toDOMPoint", { point, el, node })
 
     // If we're inside a void node, force the offset to 0, otherwise the zero
     // width spacing character will result in an incorrect offset of 1
     if (Editor.void(editor, { at: point })) {
       point = { path: point.path, offset: 0 }
+      // console.log("void - new point", { point })
     }
 
     // For each leaf, we need to isolate its content, which means filtering
@@ -237,11 +239,23 @@ export const ReactEditor = {
     const texts = Array.from(el.querySelectorAll(selector))
     let start = 0
 
+    // No leaves found, so for sure we can't find a DOM node.
+    if (!(texts.length > 0)) {
+      throw new Error(
+        `Cannot resolve a DOM point from Slate point: ${JSON.stringify(point)}\n` +
+        `querySelectorAll('${selector}') found no text nodes - ` +
+        `Did you forget {children} in renderLeaf?`
+      )
+    }
+    // console.log("querySelectorAll", { el, selector, texts })
+
+    // Walk through `texts` nodes until we find the one `point.offset`
+    // would fall inside of, which is the domPoint we're looking for.
     for (const text of texts) {
       const domNode = text.childNodes[0] as HTMLElement
 
       if (domNode == null || domNode.textContent == null) {
-        continue
+        continue  // Not a text node, skip -- FIXME: should not happen?
       }
 
       const { length } = domNode.textContent
@@ -252,13 +266,17 @@ export const ReactEditor = {
       if (point.offset <= end) {
         const offset = Math.min(length, Math.max(0, point.offset - start))
         domPoint = [domNode, offset]
+        // console.log(`domNode occupies ${start}..${end} >= offset (${point.offset}) => found, stop`, { domNode, domPoint })
         break
+      } else {
+        // console.log(`domNode occupies ${start}..${end} < offset (${point.offset}) => next`, { domNode })
       }
 
       start = end
     }
 
     if (!domPoint) {
+      console.error("toDOMPoint: No matching DOM node found", { point, dom: el })
       throw new Error(
         `Cannot resolve a DOM point from Slate point: ${JSON.stringify(point)}`
       )
@@ -272,12 +290,15 @@ export const ReactEditor = {
    */
 
   toDOMRange(editor: ReactEditor, range: Range): DOMRange {
+    // console.log("toDOMRange", range)
     const { anchor, focus } = range
     const isBackward = Range.isBackward(range)
     const domAnchor = ReactEditor.toDOMPoint(editor, anchor)
+    // console.log("domAnchor", domAnchor)
     const domFocus = Range.isCollapsed(range)
       ? domAnchor
       : ReactEditor.toDOMPoint(editor, focus)
+    // console.log("domFocus", domFocus)
 
     const domRange = window.document.createRange()
     const [startNode, startOffset] = isBackward ? domFocus : domAnchor

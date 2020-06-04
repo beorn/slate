@@ -170,21 +170,20 @@ export const NodeTransforms = {
           )
         }
 
-        const parentNodeEntry = Editor.node(editor, Path.parent(path))
-        const [parent, parentPath] = parentNodeEntry as NodeEntry<Ancestor>
-        const index = path[path.length - 1]
+        const [parent, parentPath] = Editor.node(editor, Path.parent(path))
+        const index = path[path.length - 1]   // parent's index amongst grandparent.children
         const { length } = parent.children
 
-        if (length === 1) {
+        if (length === 1) { // node is only child of parent, replace parent
           const toPath = Path.next(parentPath)
           Transforms.moveNodes(editor, { at: path, to: toPath, voids })
           Transforms.removeNodes(editor, { at: parentPath, voids })
-        } else if (index === 0) {
+        } else if (index === 0) {   // parent is first child of grandparent, move ahead of parent
           Transforms.moveNodes(editor, { at: path, to: parentPath, voids })
-        } else if (index === length - 1) {
+        } else if (index === length - 1) {  // parent is last child of grandparent, move after parent
           const toPath = Path.next(parentPath)
           Transforms.moveNodes(editor, { at: path, to: toPath, voids })
-        } else {
+        } else {      // parent has prev/next siblings, split node
           const splitPath = Path.next(path)
           const toPath = Path.next(parentPath)
           Transforms.splitNodes(editor, { at: splitPath, voids })
