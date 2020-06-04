@@ -250,6 +250,20 @@ export const Editable = (props: EditableProps) => {
           }
         }
 
+
+        function saveKillBuffer(at = targetRange) {
+          const targetNodes = Editor.fragment(editor, at)
+          console.log("onDOMBeforeInput: Saving kill buffer", targetNodes)
+          editor.killBuffer = targetNodes // TODO: this should probably be a transformation
+        }
+        // Some delete* commands should save to the kill buffer, which can be yanked later
+        // if (['deleteEntireSoftLine',
+        //   'deleteSoftLineBackward', 'deleteHardLineBackward', 'deleteWordBackward',
+        //   'deleteSoftLineForward', 'deleteHardLineForward', 'deleteWordForeward',
+        // ].includes(type)) {
+        //   saveKillBuffer()  // TODO: getTargetRange() actually returns a bogus range, often including the next block
+        // }
+
         // COMPAT: If the selection is expanded, even if the command seems like
         // a delete forward/backward command it should delete the selection.
         if (
