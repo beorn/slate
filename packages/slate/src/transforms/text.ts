@@ -27,6 +27,7 @@ export const TextTransforms = {
       voids?: boolean
     } = {}
   ) {
+    console.error("Transforms.delete", {options})
     Editor.withoutNormalizing(editor, () => {
       const {
         reverse = false,
@@ -34,6 +35,7 @@ export const TextTransforms = {
         distance = 1,
         voids = false,
       } = options
+      console.error("Transforms.delete - inner", { unit })
       let { at = editor.selection, hanging = false } = options
 
       if (!at) {
