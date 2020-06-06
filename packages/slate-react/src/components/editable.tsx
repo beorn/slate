@@ -171,6 +171,8 @@ export const Editable = (props: EditableProps) => {
     state.isUpdatingSelection = true
     domSelection.removeAllRanges()
 
+    console.log("Editable: updating DOM Selection")
+
     const newDomRange = selection && ReactEditor.toDOMRange(editor, selection)
 
     console.log("Editable: updating DOM Selection", newDomRange)
@@ -746,11 +748,15 @@ export const Editable = (props: EditableProps) => {
               hasTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onDragStart)
             ) {
+<<<<<<< HEAD
               console.log("Editable.onDragStart", {
                 eventTarget: event.target,
                 dataTransfer: event.dataTransfer,
                 nativeEvent: event.nativeEvent
               })
+=======
+              console.log("Editable.onDragStart", { target: event.target })
+>>>>>>> bfcfaca3d63e537262c190040784ec40ae0d38ba
               const node = ReactEditor.toSlateNode(editor, event.target)
               const path = ReactEditor.findPath(editor, node)
               const voidMatch = Editor.void(editor, { at: path })
