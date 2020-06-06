@@ -171,9 +171,9 @@ export const Editable = (props: EditableProps) => {
     state.isUpdatingSelection = true
     domSelection.removeAllRanges()
 
-    console.log("Editable: updating DOM Selection")
-
     const newDomRange = selection && ReactEditor.toDOMRange(editor, selection)
+
+    console.log("Editable: updating DOM Selection", newDomRange)
 
     if (newDomRange) {
       domSelection.addRange(newDomRange!)
@@ -217,6 +217,15 @@ export const Editable = (props: EditableProps) => {
         isComposing: boolean
       }
     ) => {
+      console.group("onDOMBeforeInput", event.inputType, {
+        data: event.data,
+        dataTransfer: event.dataTransfer,
+        targetRanges: event.getTargetRanges(),
+        hasEditableTarget: hasEditableTarget(editor, event.target),
+        isDOMEventHandled: isDOMEventHandled(event, propsOnDOMBeforeInput),
+        event
+      })
+      try {
       if (
         !readOnly &&
         hasEditableTarget(editor, event.target) &&
@@ -245,8 +254,8 @@ export const Editable = (props: EditableProps) => {
 
           if (targetRange) {
             const range = ReactEditor.toSlateRange(editor, targetRange)
-            console.error("toRange", {rangesEqual: Range.equals(selection, range)},
-              { slateSelection: editor.selection, slateTarget: range,
+            console.log("targetRange", {rangesEqual: Range.equals(selection, range)},
+              { slateSelsection: editor.selection, slateTarget: range,
                 domTarget: targetRange })
             
             if (!selection || !Range.equals(selection, range)) {
@@ -381,7 +390,7 @@ export const Editable = (props: EditableProps) => {
             if (data instanceof DataTransfer) {
               ReactEditor.insertData(editor, data)
             } else if (typeof data === 'string') {
-              console.error("editable.insertText", data, editor.selection)
+              console.log("insertText", data, editor.selection)
               Editor.insertText(editor, data)
             }
             break
@@ -392,6 +401,9 @@ export const Editable = (props: EditableProps) => {
           }
         }
       }
+    } finally {
+      console.groupEnd()
+    }
     },
     [readOnly]
   )
@@ -734,7 +746,11 @@ export const Editable = (props: EditableProps) => {
               hasTarget(editor, event.target) &&
               !isEventHandled(event, attributes.onDragStart)
             ) {
-              console.log("Editable.onDragStart", { target: event.target })
+              console.log("Editable.onDragStart", {
+                eventTarget: event.target,
+                dataTransfer: event.dataTransfer,
+                nativeEvent: event.nativeEvent
+              })
               const node = ReactEditor.toSlateNode(editor, event.target)
               const path = ReactEditor.findPath(editor, node)
               const voidMatch = Editor.void(editor, { at: path })
@@ -753,6 +769,16 @@ export const Editable = (props: EditableProps) => {
         )}
         onDrop={useCallback(
           (event: React.DragEvent<HTMLDivElement>) => {
+            console.log("Editable.onDrop --- start", event.key,
+              {
+                readOnly,
+                editableTarget: hasEditableTarget(editor, event.target),
+                eventHandled: isEventHandled(event, attributes.onDrop),
+                eventDataTransfer: event.dataTransfer,  // NOTE: this and the below are mutated so won't be accurate
+                eventData: event.data,
+                nativeEvent: event.nativeEvent
+              },
+              { event, attributes })
             if (
               hasTarget(editor, event.target) &&
               !readOnly &&

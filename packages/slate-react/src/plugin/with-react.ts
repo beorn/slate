@@ -59,8 +59,10 @@ export const withReact = <T extends Editor>(editor: T) => {
 
   e.setFragmentData = (data: DataTransfer) => {
     const { selection } = e
+    // NOTE: copies from editor.selection - doesn't care about anything in data
 
     if (!selection) {
+      console.log("setFragmentData: !selection")
       return
     }
 
@@ -69,6 +71,7 @@ export const withReact = <T extends Editor>(editor: T) => {
     const endVoid = Editor.void(e, { at: end.path })
 
     if (Range.isCollapsed(selection) && !startVoid) {
+      console.log("setFragmentData: Range.isCollapsed && !startVoid")
       return
     }
 
@@ -89,6 +92,7 @@ export const withReact = <T extends Editor>(editor: T) => {
     // range from the void node's spacer span, to the end of the void node's
     // content, since the spacer is before void's content in the DOM.
     if (endVoid) {
+      console.log("setFragmentData: endVoid")
       const [voidNode] = endVoid
       const r = domRange.cloneRange()
       const domNode = ReactEditor.toDOMNode(e, voidNode)
@@ -101,6 +105,7 @@ export const withReact = <T extends Editor>(editor: T) => {
     // attaching it to empty `<div>/<span>` nodes will end up having it erased by
     // most browsers. (2018/04/27)
     if (startVoid) {
+      console.log("setFragmentData: startVoid")
       attach = contents.querySelector('[data-slate-spacer]')! as HTMLElement
     }
 
@@ -124,6 +129,7 @@ export const withReact = <T extends Editor>(editor: T) => {
       span.appendChild(attach)
       contents.appendChild(span)
       attach = span
+      console.log("setFragmentData: isDOMText", { attach })
     }
 
     const fragment = e.getFragment()
@@ -139,6 +145,7 @@ export const withReact = <T extends Editor>(editor: T) => {
     document.body.appendChild(div)
     data.setData('text/html', div.innerHTML)
     data.setData('text/plain', getPlainText(div))
+    console.log("setFragmentData: fragment", { json: string, html: div.innerHTML, text: getPlainText(div), attach })
     document.body.removeChild(div)
   }
 
@@ -148,13 +155,17 @@ export const withReact = <T extends Editor>(editor: T) => {
     if (fragment) {
       const decoded = decodeURIComponent(window.atob(fragment))
       const parsed = JSON.parse(decoded) as Node[]
+      console.log("insertData fragment", parsed)
       Transforms.insertFragment(e, parsed)
       return
     }
 
+    const html = data.getData('text/html')
+
     const text = data.getData('text/plain')
 
     if (text) {
+      console.log("insertData text/plain", text)
       const lines = text.split(/\r\n|\r|\n/)
       let split = false
 
