@@ -633,7 +633,6 @@ export const Editable = (props: EditableProps) => {
               event, target: event.target,
               attributes,
               hasTarget: hasTarget(editor, event.target),
-              isHandled: isEventHandled(event, attributes.onClick),
               node, path
             })
             if (
@@ -775,7 +774,6 @@ export const Editable = (props: EditableProps) => {
               {
                 readOnly,
                 editableTarget: hasEditableTarget(editor, event.target),
-                eventHandled: isEventHandled(event, attributes.onDrop),
                 eventDataTransfer: event.dataTransfer,  // NOTE: this and the below are mutated so won't be accurate
                 eventData: event.data,
                 nativeEvent: event.nativeEvent
@@ -834,7 +832,6 @@ export const Editable = (props: EditableProps) => {
             console.log("Editable.onKeyDown --- start", event.key,
               {
                 editableTarget: hasEditableTarget(editor, event.target),
-                eventHandled: isEventHandled(event, attributes.onKeyDown),
                 readOnly
               },
               { event, attributes })
