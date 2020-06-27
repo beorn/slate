@@ -219,19 +219,20 @@ export const Editable = (props: EditableProps) => {
         isComposing: boolean
       }
     ) => {
+      const isHandled = isDOMEventHandled(event, propsOnDOMBeforeInput)
       console.group("onDOMBeforeInput", event.inputType, {
         data: event.data,
         dataTransfer: event.dataTransfer,
         targetRanges: event.getTargetRanges(),
         hasEditableTarget: hasEditableTarget(editor, event.target),
-        isDOMEventHandled: isDOMEventHandled(event, propsOnDOMBeforeInput),
+        isHandled,
         event
       })
       try {
       if (
         !readOnly &&
         hasEditableTarget(editor, event.target) &&
-        !isDOMEventHandled(event, propsOnDOMBeforeInput)
+        !isHandled
       ) {
         const { selection } = editor
         const { inputType: type } = event
