@@ -175,13 +175,16 @@ export const Editable = (props: EditableProps) => {
     }
 
     // If the DOM selection is in the editor and the editor selection is already correct, we're done.
-    if (
-      hasDomSelection &&
-      hasDomSelectionInEditor &&
-      selection &&
-      Range.equals(ReactEditor.toSlateRange(editor, domSelection), selection)
-    ) {
-      return
+    if (hasDomSelection && hasDomSelectionInEditor && selection) {
+      try {
+        const domRange = ReactEditor.toSlateRange(editor, domSelection)
+        if (Range.equals(domRange, selection)) return
+      } catch (err) {
+        // Failed to find DOM range from Slate range, assume that
+        // this is because the domSelection is out-of-sync, so we
+        // can continue updating it below
+        console.log('Editable - toSlateRange(domRange):', err, { domSelection }) // eslint-disable-line
+      }
     }
 
     // when <Editable/> is being controlled through external value
