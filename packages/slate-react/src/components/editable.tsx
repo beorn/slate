@@ -1111,7 +1111,7 @@ const isTargetInsideVoid = (
 }
 
 /**
- * Check if an event is overrided by a handler.
+ * Check if an event is overriden by a handler, and call its handler.
  */
 
 const isEventHandled = <
@@ -1129,7 +1129,7 @@ const isEventHandled = <
 }
 
 /**
- * Check if a DOM event is overrided by a handler.
+ * Check if a DOM event is overriden by a handler, and call its handler.
  */
 
 const isDOMEventHandled = <E extends Event>(
