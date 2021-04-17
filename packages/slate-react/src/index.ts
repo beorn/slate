@@ -1,9 +1,6 @@
 // Components
-export {
-  RenderElementProps,
-  RenderLeafProps,
-  Editable,
-} from './components/editable'
+export type { RenderElementProps, RenderLeafProps } from './components/editable'
+export { Editable } from './components/editable'
 export { DefaultElement } from './components/element'
 export { DefaultLeaf } from './components/leaf'
 export { Slate } from './components/slate'
