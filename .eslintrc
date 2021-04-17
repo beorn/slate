@@ -37,6 +37,7 @@
     "mocha": true,
     "node": true
   },
+  "root": true,
   "rules": {
     "constructor-super": "error",
     "dot-notation": [
