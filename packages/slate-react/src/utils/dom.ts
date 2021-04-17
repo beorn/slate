@@ -5,23 +5,15 @@
 // COMPAT: This is required to prevent TypeScript aliases from doing some very
 // weird things for Slate's types with the same name as globals. (2019/11/27)
 // https://github.com/microsoft/TypeScript/issues/35002
-import DOMNode = globalThis.Node
-import DOMComment = globalThis.Comment
-import DOMElement = globalThis.Element
-import DOMText = globalThis.Text
-import DOMRange = globalThis.Range
-import DOMSelection = globalThis.Selection
-import DOMStaticRange = globalThis.StaticRange
-
-export {
-  DOMNode,
-  DOMComment,
-  DOMElement,
-  DOMText,
-  DOMRange,
-  DOMSelection,
-  DOMStaticRange,
-}
+// COMPAT: Seems fixed, and syntax causing problem for babel. (2021/04/17)
+// https://github.com/microsoft/TypeScript/pull/35279
+export type DOMNode = globalThis.Node
+export type DOMComment = globalThis.Comment
+export type DOMElement = globalThis.Element
+export type DOMText = globalThis.Text
+export type DOMRange = globalThis.Range
+export type DOMSelection = globalThis.Selection
+export type DOMStaticRange = globalThis.StaticRange
 
 declare global {
   interface Window {
