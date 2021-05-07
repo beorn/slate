@@ -368,9 +368,25 @@ export const Editable = (props: EditableProps) => {
             break
           }
 
-          case 'insertLineBreak':
+          case 'insertLineBreak': {
+            // @ts-ignore
+            if (editor.insertLineBreak) {
+              // @ts-ignore
+              editor.insertLineBreak()
+            } else {
+              Editor.insertBreak(editor)
+            }
+            break
+          }
+
           case 'insertParagraph': {
-            Editor.insertBreak(editor)
+            // @ts-ignore
+            if (editor.insertParagraph) {
+              // @ts-ignore
+              editor.insertParagraph()
+            } else {
+              Editor.insertBreak(editor)
+            }
             break
           }
 
