@@ -8,6 +8,7 @@ import {
   Text,
   Transforms,
   Path,
+  Location,
 } from 'slate'
 import getDirection from 'direction'
 import { HistoryEditor } from 'slate-history'
@@ -301,6 +302,20 @@ export const Editable = (props: EditableProps) => {
           }
         }
 
+        function saveKillBuffer(at: Location) {
+          const targetNodes = Editor.fragment(editor, at)
+          // console.log("onDOMBeforeInput: Saving kill buffer", targetNodes)
+          // @ts-ignore
+          editor.killBuffer = targetNodes // TODO: this should probably be a transformation
+        }
+        // Some delete* commands should save to the kill buffer, which can be yanked later
+        // if (['deleteEntireSoftLine',
+        //   'deleteSoftLineBackward', 'deleteHardLineBackward', 'deleteWordBackward',
+        //   'deleteSoftLineForward', 'deleteHardLineForward', 'deleteWordForeward',
+        // ].includes(type)) {
+        //   saveKillBuffer()  // TODO: getTargetRange() actually returns a bogus range, often including the next block
+        // }
+
         // COMPAT: If the selection is expanded, even if the command seems like
         // a delete forward/backward command it should delete the selection.
         if (
@@ -349,6 +364,16 @@ export const Editable = (props: EditableProps) => {
           }
 
           case 'deleteHardLineForward': {
+            if (!selection) break
+            const at = selection.anchor
+            const block = Editor.above(editor, {
+              at,
+              match: n => Editor.isBlock(editor, n),
+            })
+            const [, end] = Editor.edges(editor, block![1])
+            const range = Editor.range(editor, at, end)
+            saveKillBuffer(range)
+
             Editor.deleteForward(editor, { unit: 'block' })
             break
           }
@@ -390,10 +415,18 @@ export const Editable = (props: EditableProps) => {
             break
           }
 
+          case 'insertFromYank': {
+            // @ts-ignore
+            if (editor.killBuffer) {
+              // @ts-ignore
+              Editor.insertFragment(editor, editor.killBuffer as Node[])
+            }
+            break
+          }
+
           case 'insertFromComposition':
           case 'insertFromDrop':
           case 'insertFromPaste':
-          case 'insertFromYank':
           case 'insertReplacementText':
           case 'insertText': {
             if (type === 'insertFromComposition') {
